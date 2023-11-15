@@ -11,7 +11,7 @@
 
         <div class="mb-3">
           <label for="event_name" class="form-label">Event Name</label>
-          <input type="email" class="form-control" name="event_name">
+          <input type="text" class="form-control" name="event_name">
         </div>
 
         <div class="mb-3">
@@ -34,13 +34,19 @@
             <tbody>
                 <tr>
                     <td>
-                        <input type="email" class="form-control" name="inputs[0][buyer_name]">
+                        <input type="text" class="form-control" name="inputs[0][buyer_name]">
                     </td>
                     <td>
-                        <select class="form-control" name="inputs[0][ticket_tier]">
+                        <select class="form-control" name="inputs[0][ticket_id]">
                             <option value="" disabled selected hidden>Select Ticket Tier...</option>
+                            <?php
+                                $data = array();
+                                foreach( $ticketTier as $ticket ) {
+                                    $data[] = $ticket->tier_name;
+                                }
+                            ?>
                             @foreach ($ticketTier as $ticketTier_item)
-                                <option value="{{ $ticketTier_item->id }}">{{ $ticketTier_item->venue_name }}</option>
+                                <option value="{{ $ticketTier_item->id }}">{{ $ticketTier_item->tier_name }}</option>
                             @endforeach
                         </select>
                     </td>
@@ -59,37 +65,42 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
-    var tbody = $('#tableTicketBuyer').children('tbody');
-
-    var table = tbody.length ? tbody : $('#tableTicketBuyer');
-
     var i = 0;
 
     $('#addBuyerData').on('click', function() {
         ++i;
-        //Add row
-        table.append('<tr>\n\
-                    <td>\n\
-                        <input type="email" class="form-control" name="inputs[+i+][buyer_name]">\n\
-                    </td>\n\
-                    <td>\n\
-                        <select class="form-control" name="inputs['+i+'][ticket_tier]">\n\
-                            <option value="" disabled selected hidden>Select Ticket Tier...</option>\n\
-                            @foreach ($ticketTier as $ticketTier_item)\n\
-                                <option value="{{ $ticketTier_item->id }}">{{ $ticketTier_item->venue_name }}</option>\n\
-                            @endforeach\n\
-                        </select>\n\
+
+        // Get the options for ticket tiers from the server
+        var ticketOptions = {!! json_encode($ticketTier) !!};
+
+        // Add row
+        var newRow = '<tr>\n\
+                        <td>\n\
+                            <input type="text" class="form-control" name="inputs['+i+'][buyer_name]">\n\
+                        </td>\n\
+                        <td>\n\
+                            <select class="form-control" name="inputs['+i+'][ticket_id]">\n\
+                                <option value="" disabled selected hidden>Select Ticket Tier...</option>';
+
+        // Add ticket options to the dropdown
+        ticketOptions.forEach(function(ticketTier_item) {
+            newRow += '<option value="'+ticketTier_item.id+'">'+ticketTier_item.tier_name+'</option>';
+        });
+
+        newRow += '</select>\n\
                     </td>\n\
                     <td class="text-center" >\n\
                         <button type="button" class="btn btn-danger" onclick="removeRow(this)">Remove Buyer</button>\n\
                     </td>\n\
-                </tr>');
-    })
+                </tr>';
+
+        $('#tableTicketBuyer tbody').append(newRow);
+    });
 
     function removeRow(button) {
         // Remove the entire row
         $(button).closest('tr').remove();
     }
 </script>
-
 @endsection
+

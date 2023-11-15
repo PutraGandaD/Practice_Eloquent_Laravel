@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\TierTicket;
 use App\Models\Venue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
@@ -14,7 +15,12 @@ class EventController extends Controller
      */
     public function index()
     {
-        return view('events.index');
+        $eventData = Event::all();
+        $venueData = Venue::all()->count();
+        $eventCount = Event::all()->count();
+        $buyerCount = DB::table('event_ticket')->distinct('buyer_name')->count();
+        $buyerCountAll = DB::table('event_ticket')->count();
+        return view('events.index')->with('eventData', $eventData)->with('venueData', $venueData)->with('buyerCount', $buyerCount)->with('eventCount', $eventCount)->with('buyerCountAll', $buyerCountAll);
     }
 
     /**
@@ -33,12 +39,26 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $validate = $request->validate([
-            'event_name' => 'required'
+            'event_name' => 'required',
+            'venue_id' => 'required'
         ]);
 
         $event = Event::create([
-            'event_name' => $validate['event_name']
+            'event_name' => $validate['event_name'],
+            'venue_id' => $validate['venue_id']
         ]);
+
+        $inputs = $request->input('inputs');
+
+        // Iterate over the array and handle each set of data
+        foreach ($inputs as $input) {
+            // Assuming you have columns like 'buyer_name' and 'ticket_id' in the array
+            $buyerName = $input['buyer_name'];
+            $ticketId = $input['ticket_id'];
+
+            // Perform actions with the data, such as attaching to the event
+            $event->tickets()->attach($ticketId, ['buyer_name' => $buyerName]);
+        }
 
         return redirect()->route('events.index');
     }

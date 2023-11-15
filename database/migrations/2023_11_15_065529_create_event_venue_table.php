@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('event_venue', function (Blueprint $table) {
-            $table->id();
+        Schema::create('event_ticket', function (Blueprint $table) {
+            $table->uuid('event_id');
+            $table->uuid('ticket_id');
+            $table->string('buyer_name');
+            $table->foreign('event_id')->references('id')->on('events')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreign('ticket_id')->references('id')->on('tier_tickets')->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

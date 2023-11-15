@@ -12,10 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tier_tickets', function (Blueprint $table) {
-            $table->uuid('event_id');
-            $table->uuid('venue_id');
-            $table->foreign('event_id')->references('id')->on('events')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreign('venue_id')->references('id')->on('venues')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->string('tier_name');
             $table->timestamps();
         });
     }
